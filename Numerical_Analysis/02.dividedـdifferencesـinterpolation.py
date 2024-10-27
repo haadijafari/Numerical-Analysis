@@ -65,6 +65,14 @@ def calc_Pn(coef: list, x: list):
 # Sample data points
 x_values = np.array([5, 6, 9, 11, 13, 16], dtype=float)
 y_values = np.array([12, 13, 14, 16, 20, 22], dtype=float)
+while True:
+    x_values = np.array([float(i) for i in input('Enter xi values (Space separated...):\n').split()], dtype=float)
+    y_values = np.array([float(i) for i in input('Enter fi(xi) values (Space separated...):\n').split()], dtype=float)
+
+    if (len(x_values) != len(y_values)):
+        print('Number of xis shall be equal to number of fi(xi)s\nTry again!\n')
+    else:
+        break
 
 n = len(x_values) - 1
 
@@ -74,12 +82,13 @@ diff_table = divided_diff_table(x_values, y_values, n+1)
 # Print the divided difference table with diagonal alignment
 print_table_diagonal(diff_table, n + 1)
 
-
+# Print Pn(x)
 Pn = calc_Pn(diff_table[0], x_values)
 print('*'*20)
 print('P_n(x) = ', end='')
 print(Pn)
 
+# Calculate Interpolation x given by User
 while True:
     x = float([float(i) for i in input('Enter Interpolation x to calculate: ').split()][0])
     if x >= min(x_values) and x <= max(x_values):
