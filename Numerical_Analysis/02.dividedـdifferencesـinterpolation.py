@@ -62,9 +62,7 @@ def calc_Pn(coef: list, x: list):
             Pn += f"*(x-{x[j]:.2f})"
     return expand(Pn)
 
-# Sample data points
-x_values = np.array([5, 6, 9, 11, 13, 16], dtype=float)
-y_values = np.array([12, 13, 14, 16, 20, 22], dtype=float)
+# Get input from user
 while True:
     x_values = np.array([float(i) for i in input('Enter xi values (Space separated...):\n').split()], dtype=float)
     y_values = np.array([float(i) for i in input('Enter fi(xi) values (Space separated...):\n').split()], dtype=float)
