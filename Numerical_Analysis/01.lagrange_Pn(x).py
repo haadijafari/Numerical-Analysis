@@ -32,10 +32,24 @@ def lagrange_interpolation(x_values, y_values, x):
     return Pn_x, poly_term
 
 # Example usage
-x_values = [1, -1, 2]
-y_values = [0, -3, 4]
-x = 2.5
 
+while True:
+    x_values = [float(i) for i in input('Enter xi values (Space separated...):\n').split()]
+    y_values = [float(i) for i in input('Enter fi(xi) values (Space separated...):\n').split()]
+
+    if (len(x_values) != len(y_values)):
+        print('Number of xis shall be equal to number of fi(xi)s\nTry again!\n')
+    else:
+        break
+
+while True:
+    x = float([float(i) for i in input('Enter Interpolation x to calculate: ').split()][0])
+    if x >= min(x_values) and x <= max(x_values):
+        break
+    else:
+        print(f'Entered x is not in range of [{min(x_values)}, {max(x_values)}]\n Try again!\n')
+
+print('*'*20)
 result = lagrange_interpolation(x_values, y_values, x)
 print(f"P{len(x_values)}({x}) = {result[0]}\n")
 print(f'P{len(x_values)}(x) = ', end='')
