@@ -16,15 +16,34 @@ def divided_diff_table(x, y, n):
     return diff_table
 
 # Function to print the divided difference table in diagonal format
-def print_table_diagonal(diff_table, n, x):
+def print_table_diagonal(diff_table, n):
     print("Divided Difference Table:")
-    for i in range(n):
-        # Print the first column (y values)
-        print(f"f({x[i]}) = {diff_table[i][0]:.2f}")
+    
+    for i in range(2 * n):
+        # Calculate the current i index
+        row = int(i / 2)
         
-        # For other columns, add indentation to create the diagonal effect
-        for j in range(1, n - i):
-            print(((" " * (j * 20)) if j==1 else (" " * (j * 15))) + f"{diff_table[i][j]:.2f}")
+        # Print given fi labels
+        if i % 2 == 0:
+            print(f'f{row} = ', end='')
+        else:
+            print(' ' * 5, end='')
+
+        for j in range(0, 2 * min(row + 1, n - row), 2):
+            if i % 2 == 0:
+                # Print the even rows with spaces after each term
+                print(f'{diff_table[row][j]:.2f}', end=' ' * 6)
+            else:
+                # To avoid printing elements outside the range
+                if j + 1 < n - row:
+                    # Print the odd rows with spaces before each term
+                    print(f'{" " * 6}{diff_table[row][j + 1]:.2f}', end='')
+            
+            # Decrement the row value for the next iteration
+            row -= 1
+        
+        # Move to the next line after processing a row
+        print()
 
 # Function to calculate the Pn(x) and simplify it using expand function
 def calc_Pn(coef: list, x: list):
@@ -53,7 +72,7 @@ n = len(x_values) - 1
 diff_table = divided_diff_table(x_values, y_values, n+1)
 
 # Print the divided difference table with diagonal alignment
-print_table_diagonal(diff_table, n+1, x_values)
+print_table_diagonal(diff_table, n + 1)
 
 
 Pn = calc_Pn(diff_table[0], x_values)
