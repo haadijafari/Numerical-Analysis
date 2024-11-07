@@ -1,4 +1,5 @@
 import numpy as np
+from math import factorial
 from sympy import expand, symbols
 
 # Function to calculate the forward difference table
@@ -45,28 +46,27 @@ def print_table_diagonal(diff_table, n):
         # Move to the next line after processing a row
         print()
 
-# Function to calculate factorial
-def factorial(n):
-    if n == 0:
-        return 1
-    return n * factorial(n - 1)
+# Function to calculate C(s,j)
+def Combination(s, j):
+    comb = ''
+    for i in range(j):
+        comb += f'(({s})-{j-i-1})*'
+    return comb
 
 # Function to calculate the Pn(x) and simplify it using expand function
-# def calc_Pn(coef: list, x: list):
-#     n = len(coef)
-#     Pn = ''
+def calc_Pn(coef: list, x: list):
+    n = len(coef)
+    h = coef[1] - coef[0]
+    s = f'(x-{x[0]})/{h}'
+    Pn = ''
     
-#     # Constant term f[x0]
-#     Pn += f"{coef[0]:.2f}"
+    # Constant term f[x0]
+    Pn += f"{coef[0]:.2f}"
     
-#     # For each remaining term, build the polynomial
-#     for i in range(1, n):
-#         Pn += f"{coef[i]:+.2f}"  # Sign and coefficient for the term
-        
-#         # Now add the factors (x - x_j) for j = 0 to i-1
-#         for j in range(i):
-#             Pn += f"*(x-{x[j]:.2f})"
-#     return expand(Pn)
+    # For each remaining term, build the polynomial
+    for i in range(1, n):
+        Pn += f"+({Combination(s,i)}{coef[i]})/{factorial(i)}"
+    return expand(Pn)
 
 # Function to calculate the value using Newton Forward Interpolation
 def newton_forward_interpolation(x_values, y_values, x):
@@ -109,6 +109,7 @@ while True:
     else:
         break
     print('Try again!\n')
+
 while True:
     x = float([float(i) for i in input('Enter Interpolation x to calculate: ').split()][0])
     if x >= min(x_values) and x <= max(x_values):
@@ -119,6 +120,12 @@ while True:
 # Print Divided Difference Table
 diff_table = forward_difference_table(x_values, y_values)
 print_table_diagonal(diff_table, n = len(x_values))
+
+# Print Pn(x)
+print('*'*20)
+Pn = calc_Pn(diff_table[0], x_values)
+print(f'P{len(x_values)-1}(x) = ', end='')
+print(Pn)
 
 # Calculate the interpolated value
 interpolated_value = newton_forward_interpolation(x_values, y_values, x)
