@@ -99,10 +99,16 @@ while True:
     x_values = np.array([float(i) for i in input('Enter xi values (Space separated...):\n').split()], dtype=float)
     y_values = np.array([float(i) for i in input('Enter fi(xi) values (Space separated...):\n').split()], dtype=float)
 
-    if (len(x_values) != len(y_values)):
-        print('Number of xis shall be equal to number of fi(xi)s\nTry again!\n')
+    h = set()
+    for i in range(0, len(x_values) - 1):
+        h.add(x_values[i + 1] - x_values[i])
+    if len(h) != 1:
+        print('You shall enter sentences of the Xi sequence equally spaced')
+    elif (len(x_values) != len(y_values)):
+        print('Number of xis shall be equal to number of fi(xi)s')
     else:
         break
+    print('Try again!\n')
 while True:
     x = float([float(i) for i in input('Enter Interpolation x to calculate: ').split()][0])
     if x >= min(x_values) and x <= max(x_values):
@@ -110,7 +116,7 @@ while True:
     else:
         print(f'Entered x is not in range of [{min(x_values)}, {max(x_values)}]\n Try again!\n')
 
-
+# Print Divided Difference Table
 diff_table = forward_difference_table(x_values, y_values)
 print_table_diagonal(diff_table, n = len(x_values))
 
