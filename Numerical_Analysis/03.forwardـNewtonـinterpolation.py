@@ -93,14 +93,27 @@ def newton_forward_interpolation(x_values, y_values, x):
     
     return result
 
-# Example usage:
-x_values = [1, 2, 3, 4]
-y_values = [2, 5, 10, 17]  # Corresponding y_values
-x = 2.5  # The x value to interpolate
+
+# Get input from user
+while True:
+    x_values = np.array([float(i) for i in input('Enter xi values (Space separated...):\n').split()], dtype=float)
+    y_values = np.array([float(i) for i in input('Enter fi(xi) values (Space separated...):\n').split()], dtype=float)
+
+    if (len(x_values) != len(y_values)):
+        print('Number of xis shall be equal to number of fi(xi)s\nTry again!\n')
+    else:
+        break
+while True:
+    x = float([float(i) for i in input('Enter Interpolation x to calculate: ').split()][0])
+    if x >= min(x_values) and x <= max(x_values):
+        break
+    else:
+        print(f'Entered x is not in range of [{min(x_values)}, {max(x_values)}]\n Try again!\n')
+
+
+diff_table = forward_difference_table(x_values, y_values)
+print_table_diagonal(diff_table, n = len(x_values))
 
 # Calculate the interpolated value
 interpolated_value = newton_forward_interpolation(x_values, y_values, x)
 print(f"The interpolated value at x = {x} is: {interpolated_value}")
-
-diff_table = forward_difference_table(x_values, y_values)
-print_table_diagonal(diff_table, n = len(x_values))
