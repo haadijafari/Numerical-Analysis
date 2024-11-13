@@ -63,7 +63,7 @@ splines = natural_cubic_spline(x_points, y_points)
 print_expanded_segment_functions(splines, x_points)
 
 # Plotting the cubic spline interpolation
-x_vals = np.linspace(0, 3, 100)
+x_vals = np.linspace(min(x_points), max(x_points), 100)
 y_vals = [evaluate_spline(splines, x, x_points) for x in x_vals]
 
 plt.plot(x_points, y_points, 'o', label='Data points')
