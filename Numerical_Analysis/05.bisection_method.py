@@ -18,8 +18,11 @@ def bisection_method(func, a, b, epsilon):
 
 # Input from the user
 if __name__ == "__main__":
+    import math  # Import math for functions like sin, exp, etc.
+    
     # Dynamically define the function
-    func_str = input("Enter the function in terms of x (e.g., x**3 - x - 2): ")
+    print("Note: Use math.sin(x), math.exp(x), etc., for functions.")
+    func_str = input("Enter the function in terms of x (e.g., math.sin(x) - 0.5): ")
     func = lambda x: eval(func_str)
     
     a = float(input("Enter the value of a: "))
