@@ -2,74 +2,100 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sympy as sp
 
-# Define the function to compute natural cubic splines
-def natural_cubic_spline(x, y):
+def cubic_spline(x, y):
     n = len(x) - 1
-    h = [x[i+1] - x[i] for i in range(n)]
-    b = [(y[i+1] - y[i]) / h[i] for i in range(n)]
+    A_matrix = np.zeros(shape=((n - 1), (n - 1)))
+    for i in range(len(A_matrix)):
+        if i - 1 >= 0:
+            A_matrix[i][i - 1] = x[i+1] - x[i] #hi
+        A_matrix[i][i] = 2 * ((x[i+1] - x[i]) + (x[i+2] - x[i+1]))
+        if i + 1 < len(A_matrix):
+            A_matrix[i][i + 1] = x[i+2] - x[i+1]
+
+    f_xi = []
+    for i in range(len(y) - 1):
+        f_xi.append((y[i+1] - y[i]) / (x[i+1] - x[i]))
+    f_xi = np.array(f_xi)
+
+    B_matrix = [f_xi[i+1] - f_xi[i] for i in range(len(f_xi) - 1)]
+
+    m_i = np.linalg.solve(A_matrix, B_matrix)
+    m_i = np.insert(m_i, 0, 0) #m0
+    m_i = np.insert(m_i, len(m_i), 0) #last m
     
-    # Set up the system of equations
-    A = np.zeros((n+1, n+1))
-    B = np.zeros(n+1)
-    
-    # Natural spline boundary conditions
-    A[0][0] = 1
-    A[n][n] = 1
-    
-    for i in range(1, n):
-        A[i][i-1] = h[i-1]
-        A[i][i] = 2 * (h[i-1] + h[i])
-        A[i][i+1] = h[i]
-        B[i] = 3 * (b[i] - b[i-1])
-    
-    # Solve for the second derivatives
-    c = np.linalg.solve(A, B)
-    
-    # Calculate coefficients for each spline segment
-    splines = []
+    d_i = []
+    c_i = []
     for i in range(n):
-        d = (c[i+1] - c[i]) / (3 * h[i])
-        b_i = b[i] - h[i] * (2 * c[i] + c[i+1]) / 3
-        splines.append((y[i], b_i, c[i], d))
+        di = y[i] - (x[i+1] - x[i]) ** 2 * m_i[i]
+        d_i.append(di)
+
+        ci = f_xi[i] + (x[i+1] - x[i])*(m_i[i] - m_i[i+1])
+        c_i.append(ci)
+
+
+    s_i = ['' for _ in range(n)]
+
+    for i in range(n):
+        exp_1 = f'(((x-{x[i+1]})**3)/{(x[i+1] - x[i])})*{m_i[i]}'
+        exp_2 = f'((((x-{x[i]})**3)*{m_i[i+1]})/{(x[i+1] - x[i])})'
+        exp_3 = f'{c_i[i]}*(x-{x[i]})'
+        exp_4 = f'{d_i[i]}'
+        s_i[i] = sp.expand(f'-{exp_1} + {exp_2} + {exp_3} + {exp_4}')
+
+    return s_i
+
+
+def print_cubic_spline(spline_list, x):
+    for i in range(len(spline_list)):
+        print(f'S{i}(x) = {spline_list[i]}\tif\t{x[i]} <= x <= {x[i+1]}')
+
+
+def calculate_interpolation(spline_list, x_values, x):
+    for i in range(len(x_values  - 1)):
+        if x_values[i] <= x <= x_values[i+1]:
+            return sp.expand(str(spline_list[i]).replace('x', '(' + str(x) + ')'))
+
+
+def draw_graph(spline, x_values):
+    x_fine = np.linspace(min(x_values), max(x_values), 1000)  # Fine x values for smooth curve
+    y_fine = []
     
-    return splines
+    for x in x_fine:
+        y_fine.append(sp.N(calculate_interpolation(spline, x_values, x)))
 
-# Function to evaluate the spline at a given point
-def evaluate_spline(splines, x, x_points):
-    for i in range(len(x_points) - 1):
-        if x_points[i] <= x <= x_points[i+1]:
-            a, b, c, d = splines[i]
-            dx = x - x_points[i]
-            return a + b*dx + c*dx**2 + d*dx**3
-    return None
+    plt.figure(figsize=(10, 6))
+    plt.plot(x_values, y_values, 'o', label='Given Points')  # Plot original points
+    plt.plot(x_fine, y_fine, label='Cubic Spline')          # Plot spline
+    plt.title('Cubic Spline Interpolation')
+    plt.xlabel('x')
+    plt.ylabel('f(x)')
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+    
 
-# Function to print expanded segment functions
-def print_expanded_segment_functions(splines, x_points):
-    x = sp.Symbol('x')
-    for i, (a, b, c, d) in enumerate(splines):
-        dx = x - x_points[i]
-        segment_expr = a + b * dx + c * dx**2 + d * dx**3
-        expanded_expr = sp.expand(segment_expr)
-        print(f"S_{i}(x) = {expanded_expr}, for x in [{x_points[i]}, {x_points[i+1]}]")
 
-# Test data
-x_points = [0, 1, 2, 3]
-y_points = [0, 0.5, 2, 1.5]
+# Get inputs
+while True:
+    x_values = np.array([float(i) for i in input('Enter xi values (Space separated...):\n').split()], dtype=float)
+    y_values = np.array([float(i) for i in input('Enter fi(xi) values (Space separated...):\n').split()], dtype=float)
 
-# Compute the splines
-splines = natural_cubic_spline(x_points, y_points)
+    if (len(x_values) != len(y_values)):
+        print('Number of xis shall be equal to number of fi(xi)s')
+    else:
+        break
+    print('Try again!\n')
 
-# Print expanded segment functions
-print_expanded_segment_functions(splines, x_points)
 
-# Plotting the cubic spline interpolation
-x_vals = np.linspace(min(x_points), max(x_points), 100)
-y_vals = [evaluate_spline(splines, x, x_points) for x in x_vals]
+spline = cubic_spline(x_values, y_values)
+print_cubic_spline(spline, x_values)
+draw_graph(spline, x_values)
 
-plt.plot(x_points, y_points, 'o', label='Data points')
-plt.plot(x_vals, y_vals, label='Cubic spline')
-plt.legend()
-plt.xlabel('x')
-plt.ylabel('y')
-plt.title('Natural Cubic Spline Interpolation')
-plt.show()
+while True:
+    x = float([float(i) for i in input('Enter Interpolation x to calculate: ').split()][0])
+    if x >= min(x_values) and x <= max(x_values):
+        break
+    else:
+        print(f'Entered x is not in range of [{min(x_values)}, {max(x_values)}]\n Try again!\n')
+
+print(calculate_interpolation(spline, x_values, x))
